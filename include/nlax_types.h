@@ -4,11 +4,10 @@
 
 #ifndef NLAX_TYPES_H
 #define NLAX_TYPES_H
-
-#include <xmath_common.h>
-using xmath::uint;
-using xmath::Real;
-using xmath::EPS;
-using xmath::isZero;
-using xmath::isEqual;
+namespace nlax
+{
+    using uint = unsigned int;
+    using Real = double;
+    const Real EPS = 1e-14;
+}
 #endif //NLAX_TYPES_H

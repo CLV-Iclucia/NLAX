@@ -3,3 +3,7 @@
 //
 
 #include "Solver.h"
+#include <nlax_rand.h>
+namespace nlax
+{
+}

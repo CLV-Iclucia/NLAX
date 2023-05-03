@@ -1,22 +1,21 @@
 //
 // Created by creeper on 22-11-5.
 //
-#include "../Factorize.h"
-#include "../Numerical.h"
+#include "Factorize.h"
 
 namespace nlax
 {
-    void LUDecompose(const Matrix<Real>& A, Matrix<Real>& L, Matrix<Real>& M, Matrix<Real>& U)
+    void LUDecompose(const Matrix A, Matrix L, Matrix& M, Matrix& U)
     {
-        assert(A.getM() == L.getM() && A.getN() == U.getN());
+        assert(A.rows() == L.rows() && A.cols() == U.cols());
         M = A;
         L.MakeIdentity();
         U.MakeIdentity();
         uint start_up = 0, rk = 0;
-        for(int i = 0; i < A.getN(); i++)
+        for(int i = 0; i < A.cols(); i++)
         {
             bool fullZero = true;
-            for(int j = 0; j < A.getM(); j++)
+            for(int j = 0; j < A.rows(); j++)
             {
                 if(A[j][i] != 0)
                 {
@@ -27,11 +26,11 @@ namespace nlax
             if(!fullZero) break;
             start_up++;
         }
-        for(uint i = 0, p = start_up; i < A.getM() && p < A.getN(); i++, p++, rk++)
+        for(uint i = 0, p = start_up; i < A.rows() && p < A.cols(); i++, p++, rk++)
         {
             Real max_val = std::abs(M[i][p]);
             uint idx = i;
-            for(uint j = i + 1; j < A.getM(); j++)
+            for(uint j = i + 1; j < A.rows(); j++)
             {
                 if(std::abs(M[j][p]) > max_val)
                 {
@@ -39,19 +38,19 @@ namespace nlax
                     idx = j;
                 }
             }
-            FirstElementaryRowOpt(M, i, idx, p, A.getN());
+            FirstElementaryRowOpt(M, i, idx, p, A.cols());
             FirstElementaryRowOpt(L, i, idx);
             Real NegInv = -1.0 / M[i][p];
-            for(uint j = i + 1; j < A.getM(); j++)
+            for(uint j = i + 1; j < A.rows(); j++)
             {
                 SecondElementaryRowOpt(L, i, NegInv * M[j][p], j);
-                SecondElementaryRowOpt(M, i, NegInv * M[j][p], j, p, A.getN());
+                SecondElementaryRowOpt(M, i, NegInv * M[j][p], j, p, A.cols());
             }
         }// after this, we get L and M turns into an upper triangle matrix, perform row op to calc U
         for(uint i = 0, p = start_up; i < rk; i++, p++)
         {
             Real NegInv = -1.0 / M[i][p];
-            for(uint j = p + 1; j < A.getN(); j++)
+            for(uint j = p + 1; j < A.cols(); j++)
             {
                 SecondElementaryColumnOpt(U, p, NegInv * M[i][j], j);
                 SecondElementaryColumnOpt(M, p, NegInv * M[i][j], j, i, i + 1);
@@ -66,7 +65,7 @@ namespace nlax
         if(!isSymmetric(A)) return ;
         P.MakeIdentity();
         D.copyFrom(A);//now we perform row and column operations symmetrically and alternatively
-        uint n = A.getM();
+        uint n = A.rows();
         for(int i = 0; i < n; i++)//now we are considering sub-matrix D[i ~ n - 1][i ~ n - 1]
         {
             int idx = i;//idx denotes the row whose ith element has the greatest abs value
@@ -118,8 +117,8 @@ namespace nlax
 
     void QRDecompose(const Matrix<Real>& A, Matrix<Real>& Q, Matrix<Real>& R)
     {
-        assert(A.getM() == A.getN());
-        int n = A.getN();
+        assert(A.rows() == A.cols());
+        int n = A.cols();
         Vec* C = A.ColumnVector();
         Vec* q = new Vec[n];
         for(int i = 0; i < n; i++)
