@@ -130,14 +130,22 @@ namespace nlax
         public:
             void solve(const Matrix& A, const Vector& b, Vector& ret) override
             {
-                assert(A.isSymmetric() && A.rows() == b.dim() && A.rows() == ret.dim());
-                ret.randFill();
-                Vector r(ret.dim()), p(ret.dim());
-                r = b - A * ret;
-                Real alpha;
-                for(int i = 1; r.L1Norm() >= EPS * b.L1Norm() && (maxRound < 0 || i < maxRound); i++)
+                assert(A.isSymmetric());
+                assert(A.isSymmetric() && A.cols() == ret.dim());
+                Vector r(b - A * ret);
+                Vector p(r);
+                Real alpha, beta, rNormSqrCache = r.L2NormSqr();
+                Vector Ap = A * p;
+                for(nRounds = 1; maxRound < 0 || nRounds < maxRound; nRounds++)
                 {
-                    ret += alpha * p;
+                    alpha = rNormSqrCache / p.dot(Ap);
+                    ret.saxpy(p, alpha);
+                    if(alpha * p.L1Norm() < conv_eps) break;
+                    r.saxpy(Ap, -alpha);
+                    beta = r.L2NormSqr() / rNormSqrCache;
+                    rNormSqrCache = r.L2NormSqr();
+                    p.scadd(r, beta);
+                    Ap = A * p;
                 }
             }
     };

@@ -70,19 +70,26 @@ namespace nlax
                 if(&A == this) return *this;
                 else
                 {
-                    n = A.n;
-                    delete[] v;
-                    v = new Real[n];
+                    if(n != A.n)
+                    {
+                        n = A.n;
+                        delete[] v;
+                        v = new Real[n];
+                    }
                     memcpy(v, A.v, sizeof(Real) * n);
                     return *this;
                 }
             }
             Vector& operator=(Vector&& A) noexcept
             {
-                n = A.n;
-                delete[] v;
-                v = A.v;
-                A.v = nullptr;
+                if(n != A.n)
+                {
+                    n = A.n;
+                    delete[] v;
+                    v = A.v;
+                    A.v = nullptr;
+                }
+                else memcpy(v, A.v, sizeof(Real) * n);
                 return *this;
             }
             void fill(Real val)
@@ -122,6 +129,13 @@ namespace nlax
 //#pragma omp parallel for
                 for(i = 0; i < n; i++)
                     v[i] += A.v[i] * k;
+            }
+            void scadd(const Vector& A, Real k)
+            {
+                int i = 0;
+//#pragma omp parallel for
+                for(i = 0; i < n; i++)
+                    v[i] = k * v[i] + A.v[i];
             }
             Vector operator+(const Vector& A) const
             {
@@ -259,6 +273,16 @@ namespace nlax
                     sum += (v[i] / maxv) * (v[i] / maxv);
                 return std::sqrt(sum) * maxv;
             }
+            Real L2NormSqr() const
+            {
+                assert(n > 0);
+                Real maxv = std::abs(v[0]), sum = 0.0;
+                for(uint i = 1; i < n; i++)
+                    maxv = std::max(std::abs(v[i]), maxv);
+                for(uint i = 0; i < n; i++)
+                    sum += (v[i] / maxv) * (v[i] / maxv);
+                return sum * maxv * maxv;
+            }
             Real L1Norm() const
             {
                 assert(n > 0);
@@ -266,6 +290,14 @@ namespace nlax
                 for(uint i = 0; i < n; i++)
                     sum += std::abs(v[i]);
                 return sum;
+            }
+            Vector normalized() const
+            {
+                Real norm = L2Norm();
+                Vector ret(n);
+                for(int i = 0; i < n; i++)
+                    ret[i] = v[i] / norm;
+                return ret;
             }
             friend std::ostream& operator<<(std::ostream& o, const Vector& A)
             {

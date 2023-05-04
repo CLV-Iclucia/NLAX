@@ -35,3 +35,5 @@ file(GLOB NLAX_SOURCES ${NLAX_SOURCE_PATH})
 add_executable(VecOp ${NLAX_EXAMPLE_PATH}/VecOp.cpp ${NLAX_SOURCES} ${NLAX_HEADERS})
 add_executable(classical_iterative_methods ${NLAX_EXAMPLE_PATH}/classical_iterative_methods.cpp
                 ${NLAX_SOURCES} ${NLAX_HEADERS})
+add_executable(CG_Hilbert ${NLAX_EXAMPLE_PATH}/CG_Hilbert.cpp
+        ${NLAX_SOURCES} ${NLAX_HEADERS})

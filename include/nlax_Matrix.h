@@ -174,7 +174,7 @@ namespace nlax
                 if (!isSquare()) return false;
                 for (uint i = 0; i < m; i++)
                     for (int j = 0; j < i; j++)
-                        if (!isEqual(a[i * n + j], a[i * j + n])) return false;
+                        if (!isEqual(a[i * n + j], a[j * n + i])) return false;
                 return true;
             }
 
